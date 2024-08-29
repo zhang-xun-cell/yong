@@ -1,0 +1,128 @@
+decrypt policy (A)
+
+service HTTPS
+
+status enable
+
+
+
+
+no decrypt policy (A)
+
+
+
+
+
+pnf-mgt group "(A)"
+pnf create "(A)" online-port-lan "ge4-(A)" online-port-wan "ge5-(A)" loop-detect "off" 
+
+
+object sfc add (A) online 11 sniffer none 
+
+
+
+
+sfc add policy 1 sip any dip any szone any dzone any user none service any app any sfc none vlan none access_dir default sfc_proxy enable status enable
+
+
+
+整理exel
+截图文档测试步骤
+稳定性
+性能
+
+
+GET / HTTP/1.1
+Host: 50.1.1.100
+Connection: close
+
+
+
+jerrywang
+Legendsec@0926
+
+
+method: GET
+scheme: https
+path: /
+authority: 30.1.1.100
+<data>
+
+echo -e "GET / HTTP/1.1\r\nHost: 30.1.1.100\r\n\Connection: close" | openssl s_client -alpn h2 -connect 30.1.1.100:443
+
+
+echo -e "POST /path HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/json\r\nContent-Length: 18\r\n\r\n{\"key\": \"value\"}" | openssl s_client -connect example.com:443
+
+
+
+
+
+大流量服务链编排的情况下，可能触发删除某些会话，导致服务链的子会话找不到主会话，设备进程挂起，然后设备出现重启
+
+
+
+
+一汽丰田测试点：
+
+   1. SSL代理场景：
+
+       1. 导入服务器证书。
+       2. 验证TLS1 TLS1.1 TLS1.2 TLS1.3协商场景。
+       3. 国密算法场景基本功能验证；
+       4. 兼容性测试：
+           1. 使用谷歌浏览器进行业务访问：记录浏览器版本；
+           2. 使用edge浏览器进行业务访问：记录浏览器版本；
+           3. 使用火狐浏览器进行业务访问：记录浏览器版本；
+           4. 使用360浏览器进行业务访问：记录浏览器版本；
+           5. 使用IE浏览器进行业务访问：记录浏览器版本（选测）；
+       5. 流量编排功能基本功能验证。
+   
+
+   2. SSL卸载场景:
+     
+       1. 三层路由模式下：
+           1.  自定义端口场景。
+           2.  服务器IP地址及自定义端口不替换场景。
+           3.  验证TLS1 TLS1.1 TLS1.2 TLS1.3协商场景。
+        2. http方式业务阻断。
+        3. 国密算法场景基本功能验证；
+        4. 兼容性测试：
+           1. 使用谷歌浏览器进行业务访问：记录浏览器版本；
+           2. 使用edge浏览器进行业务访问：记录浏览器版本；
+           3. 使用火狐浏览器进行业务访问：记录浏览器版本；
+           4. 使用360浏览器进行业务访问：记录浏览器版本；
+           5. 使用IE浏览器进行业务访问：记录浏览器版本（选测）；
+        5. 流量编排功能基本功能验证。
+
+    3. 稳定性测试：
+ 
+        1. SSL卸载场景，使用测试仪表进行业务长时间访问。
+        2. SSL卸载，SSL代理场景同时存在下，使用wrk工具进行业务长时间访问。
+
+
+    发散测试：
+       
+       1. 卸载策略反复增，删，改，查等操作；
+       2. SSL卸载对象增，删，改，查，引用，去引用等操作；
+	   
+	   
+GET / HTTP/1.1
+Host: 50.1.1.100
+Connection: close
+
+
+
+wrk -c 500 -t 100 -d 100s --latency https://50.1.1.100/
+
+
+
+
+
+openssl s_client -connect 50.1.1.46:443 -ssl3
+
+
+openssl s_server -accept 443 -key RSA_ser.pem -cert RSA_ser.crt -ssl3
+
+
+
+Cipher Suite: TLS_RSA_WITH_AES_256_CBC_SHA256 (0x003d)
